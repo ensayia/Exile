@@ -29,27 +29,32 @@ local stat_slight 	= "FDFF46"
 local stat_problem 	= "FF8100"
 local stat_major 	= "DF0000"
 local stat_extreme	= "8008FF"
+	
+local hud_vert_pos 		= -128 * hud_scale	-- all HUD icon vertical position
+local hud_extra_y		= -16 * hud_scale	-- pixel offset for hot/cold icons
+local hud_text_y		= 32 * hud_scale	-- optional text stat offset
+
+local hud_tier_offset	= 80 * hud_scale	-- add to y offset of stacked icons
+local hud_lb_x 			= 0 * hud_scale
+
+local hud_health_x		= -300 * hud_scale
+local hud_hunger_x 		= -300 * hud_scale
+local hud_thirst_x 		= -64 * hud_scale
+local hud_energy_x 		= 0 
+local hud_air_temp_x 	= 64 * hud_scale
+local hud_sick_x 		= 300 * hud_scale
+local hud_body_temp_x	= 300 * hud_scale
+
+local icon_scale = {x = hud_scale, y = hud_scale}	-- all HUD icon image scale
 
 local setup_hud = function(player)
 
 	player:hud_set_flags({healthbar = false})
 	local playername = player:get_player_name()
 	
-	local hud_vert_pos 		= -128 * hud_scale	-- all HUD icon vertical position
-	local hud_extra_y		= -16 * hud_scale	-- pixel offset for hot/cold icons
-	local hud_text_y		= 32 * hud_scale	-- optional text stat offset
-	
-	local hud_tier_offset	= 80 * hud_scale	-- add to y offset of stacked icons
-	
-	local hud_health_x		= -300 * hud_scale
-	local hud_hunger_x 		= -300 * hud_scale
-	local hud_thirst_x 		= -64 * hud_scale
-	local hud_energy_x 		= 0 
-	local hud_air_temp_x 	= 64 * hud_scale
-	local hud_sick_x 		= 300 * hud_scale
-	local hud_body_temp_x	= 300 * hud_scale
-	
-	local icon_scale = {x = hud_scale, y = hud_scale}	-- all HUD icon image scale
+	local meta = player:get_meta()
+
+	local hud_longbar = meta:get_string("hud16")
 	
 	local hud_data = {}
 	
@@ -58,7 +63,7 @@ local setup_hud = function(player)
 	hud_data.p_health = player:hud_add({
 		hud_elem_type = "image",
 		scale = icon_scale,
-		offset = {x = hud_health_x, y = hud_vert_pos},
+		offset = {x = hud_health_x - hud_lb_x, y = hud_vert_pos + hud_tier_offset},
 		position = {x = .5, y = 1},
 	    text = "hud_health.png^[colorize:#"..stat_fine.."^[opacity:"..hud_opacity
 	})
@@ -66,7 +71,7 @@ local setup_hud = function(player)
 	hud_data.p_hunger = player:hud_add({
 		hud_elem_type = "image",
 		scale = icon_scale,
-		offset = {x = hud_hunger_x, y = hud_vert_pos + hud_tier_offset},
+		offset = {x = hud_hunger_x, y = hud_vert_pos},
 		position = {x = .5, y = 1},
 	    text = "hud_hunger.png^[colorize:#"..stat_fine.."^[opacity:"..hud_opacity
 	})
@@ -124,7 +129,7 @@ local setup_hud = function(player)
 	hud_data.p_sick = player:hud_add({
 		hud_elem_type = "image",
 		scale = icon_scale,
-		offset = {x = hud_sick_x, y = hud_vert_pos + hud_tier_offset},
+		offset = {x = hud_sick_x + hud_lb_x, y = hud_vert_pos + hud_tier_offset},
 		position = {x = .5, y = 1},
 	    text = "hud_sick.png^[colorize:#"..stat_fine.."^[opacity:"..hud_opacity
 	})
@@ -132,7 +137,7 @@ local setup_hud = function(player)
 	
 	hud_data.p_health_text = player:hud_add({
 		hud_elem_type = "text",
-		offset = {x = hud_health_x, y = hud_vert_pos + hud_text_y},
+		offset = {x = hud_health_x + hud_lb_x, y = hud_vert_pos + hud_text_y + hud_tier_offset},
 		number = stat_col,
 		position = {x = .5, y = 1},
 		text = ""
@@ -140,7 +145,7 @@ local setup_hud = function(player)
 
 	hud_data.p_hunger_text = player:hud_add({
 		hud_elem_type = "text",
-		offset = {x = hud_hunger_x, y = hud_vert_pos + hud_text_y + hud_tier_offset},
+		offset = {x = hud_hunger_x - hud_lb_x, y = hud_vert_pos + hud_text_y},
 		number = stat_col,
 		position = {x = .5, y = 1},
 		text = ""
@@ -164,7 +169,7 @@ local setup_hud = function(player)
 
 	hud_data.p_body_temp_text = player:hud_add({
 		hud_elem_type = "text",
-		offset = {x = hud_body_temp_x, y = hud_vert_pos + hud_text_y + hud_tier_offset},
+		offset = {x = hud_body_temp_x + hud_lb_x, y = hud_vert_pos + hud_text_y},
 		number = stat_col,
 		position = {x = .5, y = 1},
 		text = ""
@@ -181,7 +186,7 @@ local setup_hud = function(player)
 
 	hud_data.p_sick_text = player:hud_add({
 		hud_elem_type = "text",
-		offset = {x = hud_sick_x, y = hud_vert_pos + hud_text_y},
+		offset = {x = hud_sick_x, y = hud_vert_pos + hud_text_y + hud_tier_offset},
 		number = stat_col,
 		position = {x = .5, y = 1},
 		text = ""
@@ -440,7 +445,21 @@ minetest.register_globalstep(function(dtime)
 		temp(player, hud_data, meta)
 		enviro_temp(player, hud_data, meta)
 		effects(player, hud_data, meta)
-
+		
+		hud_longbar = meta:get_string("hud16")
+		
+		if hud_longbar == 'true' then
+			hud_lb_x = 64 * hud_scale
+			hud_tier_offset = 0
+		else
+			hud_lb_x = 0
+			hud_tier_offset	= 80 * hud_scale
+		end	
+		
+		player:hud_change(hud_data.p_health, "offset", {x = hud_health_x - hud_lb_x, y = hud_vert_pos + hud_tier_offset})
+		player:hud_change(hud_data.p_health_text, "offset", {x = hud_health_x - hud_lb_x, y = hud_vert_pos + hud_text_y + hud_tier_offset})
+		player:hud_change(hud_data.p_sick, "offset", {x = hud_body_temp_x + hud_lb_x, y = hud_vert_pos + hud_tier_offset})
+		player:hud_change(hud_data.p_sick_text, "offset", {x = hud_body_temp_x + hud_lb_x, y = hud_vert_pos + hud_text_y + hud_tier_offset})
    end
    timer = 0
    return nil
