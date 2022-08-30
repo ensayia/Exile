@@ -55,7 +55,7 @@ local setup_hud = function(player)
 	
 	local meta = player:get_meta()
 	
-	local show_stats = meta:get("exile_hud_show_stats") or minetest.settings:get_bool("exile_hud_show_stats") or false
+	local show_stats = meta:get("exile_hud_show_stats") or minetest.settings:get_bool("exile_hud_show_stats") or true
 	
 	-- This is a catch to check and convert the show_stats setting to work in booleans.
 	-- Global settings can return a boolean but player meta can only return strings
