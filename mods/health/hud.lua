@@ -9,8 +9,6 @@ local hud = {}
 local overlaid = {}
 local hudupdateseconds = tonumber(minetest.settings:get("exile_hud_update"))
 
-local show_stats = minetest.settings:get_bool("exile_hud_raw_stats") or false
-
 local hud_opacity = minetest.settings:get("exile_hud_icon_transparency") or 127
 local hud_scale = minetest.settings:get("gui_scaling") or 1
 
@@ -53,6 +51,19 @@ local setup_hud = function(player)
 	local playername = player:get_player_name()
 	
 	local meta = player:get_meta()
+	
+	local show_stats = meta:get("exile_hud_show_stats") or minetest.settings:get_bool("exile_hud_show_stats") or false
+	
+	-- This is a catch to check and convert the show_stats setting to work in booleans.
+	-- Global settings can return a boolean but player meta can only return strings
+	-- so we need to account for both possibilities when reading configs.
+	if show_stats == "true" then
+		show_stats = true
+	elseif show_stats == "false" then
+		show_stats = false
+	elseif show_stats == "" then
+		show_stats = false
+	end
 
 	local hud_longbar = meta:get_string("hud16")
 	
@@ -470,17 +481,18 @@ minetest.register_chatcommand("show_stats", {
 	params = "help",
     description = "Enable or disable stats showing below icons.",
     func = function(name, param)
-		local var = minetest.settings:get_bool("exile_hud_raw_stats")
+		local player = minetest.get_player_by_name(name)
+		local meta = player:get_meta()
 		if param == "help" then
 			local wlist = "/show_stats:\n"..
 			"Toggle stats showing below icons."
 			return false, wlist
 		else	
-			if var then
-				minetest.settings:set_bool("exile_hud_raw_stats", false)
+			if show_stats then
+				meta:set_string("exile_hud_raw_stats", "false")
 				show_stats = false
 			else
-				minetest.settings:set_bool("exile_hud_raw_stats", true)
+				meta:set_string("exile_hud_raw_stats", "false")
 				show_stats = true
 			end
 		end   
