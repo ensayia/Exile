@@ -9,9 +9,12 @@ local hud = {}
 local overlaid = {}
 local hudupdateseconds = tonumber(minetest.settings:get("exile_hud_update"))
 
-local hud_opacity = minetest.settings:get("exile_hud_icon_transparency") or 127
 local hud_scale = minetest.settings:get("gui_scaling") or 1
 
+-- pre-setting this outside of setup_hud() then referencing it within is the easiet
+-- way to get around an error
+
+local hud_opacity = 255
 -- These are color values for the various status levels. They have to be modified
 -- per-function below because textures expect one color format and text another.
 -- This is a minetest caveat.
@@ -64,6 +67,8 @@ local setup_hud = function(player)
 	elseif show_stats == "" then
 		show_stats = false
 	end
+	
+	hud_opacity = tonumber(meta:get("exile_hud_icon_transparency")) or minetest.settings:get("exile_hud_icon_transparency") or 127
 
 	local hud_longbar = meta:get_string("hud16")
 	
@@ -503,6 +508,8 @@ minetest.register_chatcommand("icon_transparency", {
     params = "<int>",
     description = "Set stat icon transparency between 0 and 255 or default (127)",
     func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		local meta = player:get_meta()
 		if param == "" or param == "help" then
 			local wlist = "/show_stats:\n"..
 			"Set stat icon transparency between 0 and 255.\n"..
@@ -510,19 +517,26 @@ minetest.register_chatcommand("icon_transparency", {
 			return false, wlist
 		end
 		if param == "default" then
+			meta:set_string("exile_hud_icon_transparency", "127")
 			minetest.settings:set("exile_hud_icon_transparency", 127)
 			hud_opacity = 127
 		else
 			local num = tonumber(param)
 			if type(num) == "number" then
-				if num < 0 then minetest.settings:set("exile_hud_icon_transparency", 0)
-				hud_opacity = 0
+				if num < 0 then
+					meta:set_string("exile_hud_icon_transparency", "0")
+					minetest.settings:set("exile_hud_icon_transparency", 0)
+					hud_opacity = 0
 				return false, "Icon transparency set to 0"
-				elseif num > 255 then minetest.settings:set("exile_hud_icon_transparency", 255)
+				elseif num > 255 then
+					meta:set_string("exile_hud_icon_transparency", "255")
+					minetest.settings:set("exile_hud_icon_transparency", 255)
 				hud_opacity = 255
 				return false, "Icon transparency set to 255"
-				else minetest.settings:set("exile_hud_icon_transparency", math.floor(num))
-				hud_opacity = num
+				else
+					meta:set_string("exile_hud_icon_transparency", tostring(math.floor(num)))
+					minetest.settings:set("exile_hud_icon_transparency", math.floor(num))
+					hud_opacity = num
 				return false, "Icon transparency set to "..math.floor(num)
 				end
 			else
