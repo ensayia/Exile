@@ -68,8 +68,6 @@ local setup_hud = function(player)
 	end
 	
 	hud_opacity = tonumber(meta:get("exile_hud_icon_transparency")) or minetest.settings:get("exile_hud_icon_transparency") or 127
-
-	local hud_longbar = meta:get_string("hud16")
 	
 	local hud_data = {}
 	
@@ -460,8 +458,8 @@ minetest.register_globalstep(function(dtime)
 		temp(player, hud_data, meta)
 		enviro_temp(player, hud_data, meta)
 		effects(player, hud_data, meta)
-		
-		hud_longbar = meta:get_string("hud16")
+				
+		local hud_longbar = meta:get_string("hud16") or minetest.settings:get("exile_hud_wide_hotbar") or "false"
 		
 		if hud_longbar == 'true' then
 			hud_lb_x = 64 * hud_scale
