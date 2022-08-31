@@ -11,6 +11,8 @@ local hudupdateseconds = tonumber(minetest.settings:get("exile_hud_update"))
 
 local hud_scale = minetest.settings:get("gui_scaling") or 1
 
+local show_stats = minetest.settings:get_bool("exile_hud_show_stats")
+
 -- pre-setting this outside of setup_hud() then referencing it within is the easiet
 -- way to get around an error
 
@@ -55,16 +57,13 @@ local setup_hud = function(player)
 	
 	local meta = player:get_meta()
 	
-	local show_stats = meta:get("exile_hud_show_stats") or minetest.settings:get_bool("exile_hud_show_stats") or true
+	show_stats = meta:get_string("exile_hud_show_stats")
 	
-	-- This is a catch to check and convert the show_stats setting to work in booleans.
-	-- Global settings can return a boolean but player meta can only return strings
-	-- so we need to account for both possibilities when reading configs.
-	if show_stats == "true" then
+	if show_stats == "" then
+		show_stats = minetest.settings:get_bool("exile_hud_show_stats")
+	elseif show_stats == "true" then
 		show_stats = true
 	elseif show_stats == "false" then
-		show_stats = false
-	elseif show_stats == "" then
 		show_stats = false
 	end
 	
@@ -494,10 +493,10 @@ minetest.register_chatcommand("show_stats", {
 			return false, wlist
 		else	
 			if show_stats then
-				meta:set_string("exile_hud_raw_stats", "false")
+				meta:set_string("exile_hud_show_stats", "false")
 				show_stats = false
 			else
-				meta:set_string("exile_hud_raw_stats", "false")
+				meta:set_string("exile_hud_show_stats", "true")
 				show_stats = true
 			end
 		end   

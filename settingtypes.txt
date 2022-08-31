@@ -79,7 +79,7 @@ exile_hud_wide_hotbar (Enable 16 slot hotbar) bool false
 
 # Enable or disable raw stat numbers next to the status icons
 #
-exile_hud_raw_stats (Show stat numbers by their icons) bool true
+exile_hud_show_stats (Show stat numbers by their icons) bool true
 
 # Set HUD icon transparency
 #
